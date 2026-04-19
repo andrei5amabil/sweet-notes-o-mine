@@ -19,7 +19,7 @@ export default function Navbar({ currentView, setView }: NavbarProps) {
       display: "flex", alignItems: "center", gap: "15px", padding: "10px 20px", 
       backgroundColor: "#f8f9fa", borderBottom: "1px solid #ddd" 
     }}>
-      <div style={{ fontSize: "1.2rem", fontWeight: "bold", marginRight: "20px" }}>🧁 Sweet Notes</div>
+      <div style={{ fontSize: "1.2rem", fontWeight: "bold", marginRight: "20px" }}>Sweet Notes O'Mine</div>
       <button style={btnStyle(currentView === "editor")} onClick={() => setView("editor")}>Write</button>
       <button style={btnStyle(currentView === "library")} onClick={() => setView("library")}>Vault</button>
     </nav>

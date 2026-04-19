@@ -6,6 +6,7 @@ import "@blocknote/mantine/style.css";
 
 export default function Editor({ initialFile }: { initialFile?: string | null }) {
 
+  const [difficulty, setDifficulty] = useState("");
   const [fileName, setFileName] = useState("pico-challenge-01");
 
   const handleUpload = async (file: File) => {
@@ -25,6 +26,15 @@ export default function Editor({ initialFile }: { initialFile?: string | null })
     try {
       const markdown = await editor.blocksToMarkdownLossy(editor.document);
       
+      const frontmatter = [
+        "---",
+        `difficulty: ${difficulty}`,
+        "---",
+        ""
+      ].join("\n");
+
+      const fullFileContent = frontmatter + markdown;
+
       await mkdir("picoCTF", { 
         baseDir: BaseDirectory.Document, 
         recursive: true 
@@ -33,7 +43,7 @@ export default function Editor({ initialFile }: { initialFile?: string | null })
       const cleanName = fileName.replace(/\.md$/, "");
       const path = `picoCTF/${cleanName}.md`;
 
-      await writeTextFile(path, markdown, {
+      await writeTextFile(path, fullFileContent, {
         baseDir: BaseDirectory.Document,
       });
 
@@ -52,7 +62,14 @@ export default function Editor({ initialFile }: { initialFile?: string | null })
             baseDir: BaseDirectory.Document 
           });
 
-          const blocks = await editor.tryParseMarkdownToBlocks(content);
+          const diffMatch = content.match(/difficulty:\s*(\w+)/);
+          if (diffMatch) {
+            setDifficulty(diffMatch[1]); 
+          }
+
+          const cleanBody = content.replace(/^---[\s\S]*?---/, "").trim();
+
+          const blocks = await editor.tryParseMarkdownToBlocks(cleanBody);
 
           editor.replaceBlocks(editor.document, blocks);
 
@@ -62,6 +79,11 @@ export default function Editor({ initialFile }: { initialFile?: string | null })
         } catch (err) {
           console.error("Failed to load file:", err);
         }
+      } else {
+        setFileName(`challenge-${Date.now()}`);
+        setDifficulty("Medium");
+        editor.replaceBlocks(editor.document, editor.tryParseMarkdownToBlocks(""));
+        console.log("New empty note prepared.");
       }
     };
 
@@ -95,6 +117,20 @@ export default function Editor({ initialFile }: { initialFile?: string | null })
             border: "1px solid #ccc" 
           }}
         />
+        <select 
+          value={difficulty} 
+          onChange={(e) => setDifficulty(e.target.value)}
+          style={{ 
+            padding: "8px", 
+            borderRadius: "4px", 
+            border: "1px solid #ddd",
+            backgroundColor: difficulty === "Hard" ? "#fee2e2" : difficulty === "Easy" ? "#f0fdf4" : "#fff" 
+          }}
+        >
+          <option value="Easy">🟢 Easy</option>
+          <option value="Medium">🟡 Medium</option>
+          <option value="Hard">🔴 Hard</option>
+        </select>
         <button 
           onClick={saveToLocalFolder}
           style={{ 

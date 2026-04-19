@@ -9,6 +9,11 @@ function App() {
   const [view, setView] = useState<"editor" | "library">("editor");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
+  const handleNewNote = () => {
+    setSelectedFile(null); 
+    setView("editor");    
+  };
+
   const handleSelectFile = (name: string) => {
     setSelectedFile(name);
     setView("editor"); 
@@ -23,7 +28,7 @@ function App() {
           {view === "editor" ? (
             <Editor initialFile={selectedFile} />
           ) : (
-            <Library onSelectFile={handleSelectFile} />
+            <Library onSelectFile={handleSelectFile} onNewNote={handleNewNote} />
           )}
         </main>
       </div>
